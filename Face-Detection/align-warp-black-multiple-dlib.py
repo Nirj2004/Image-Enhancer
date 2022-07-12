@@ -73,15 +73,10 @@ def compute_transformation_matrix(img, landmark, normalize, target_face_scale=1.
 
     std_pts = _standard_face_pts()  # [-1,1]
     target_pts = (std_pts * target_face_scale + 1) / 2 * 256.0
-
-    # print(target_pts)
-
     h, w, c = img.shape
     if normalize == True:
         landmark[:, 0] = landmark[:, 0] / h * 2 - 1.0
         landmark[:, 1] = landmark[:, 1] / w * 2 - 1.0
-
-    # print(landmark)
 
     affine = SimilarityTransform()
 
@@ -95,14 +90,10 @@ def compute_inverse_transformation_matrix(img, landmark, normalize, target_face_
     std_pts = _standard_face_pts()  # [-1,1]
     target_pts = (std_pts * target_face_scale + 1) / 2 * 256.0
 
-    # print(target_pts)
-
     h, w, c = img.shape
     if normalize == True:
         landmark[:, 0] = landmark[:, 0] / h * 2 - 1.0
         landmark[:, 1] = landmark[:, 1] / w * 2 - 1.0
-
-    # print(landmark)
 
     affine = SimilarityTransform()
 
@@ -177,13 +168,7 @@ def blur_blending_cv2(im1, im2, mask):
     return im
 
 
-# def Poisson_blending(im1,im2,mask):
-
-
-#     Image.composite(
 def Poisson_blending(im1, im2, mask):
-
-    # mask=1-mask
     mask *= 255
     kernel = np.ones((10, 10), np.uint8)
     mask = cv2.erode(mask, kernel, iterations=1)
@@ -230,7 +215,6 @@ def seamless_clone(old_face, new_face, raw_mask):
     prior = np.rint(np.pad(old_face * 255.0, ((height, height), (width, width), (0, 0)), "constant")).astype(
         "uint8"
     )
-    # if np.sum(insertion_mask) == 0:
     n_mask = insertion_mask[1:-1, 1:-1, :]
     n_mask = cv2.copyMakeBorder(n_mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, 0)
     print(n_mask.shape)
@@ -239,12 +223,12 @@ def seamless_clone(old_face, new_face, raw_mask):
         blended = prior
     else:
         blended = cv2.seamlessClone(
-            insertion,  # pylint: disable=no-member
+            insertion,  
             prior,
             insertion_mask,
             (x_center, y_center),
             cv2.NORMAL_CLONE,
-        )  # pylint: disable=no-member
+        )  
 
     blended = blended[height:-height, width:-width]
 
@@ -347,8 +331,6 @@ if __name__ == "__main__":
                 restored_face = Image.open(cur_url).convert("RGB")
                 restored_face = np.array(restored_face)
                 cur_face = restored_face
-
-            ## Histogram Color matching
             A = cv2.cvtColor(aligned_face.astype("uint8"), cv2.COLOR_RGB2BGR)
             B = cv2.cvtColor(cur_face.astype("uint8"), cv2.COLOR_RGB2BGR)
             B = match_histograms(B, A)
@@ -368,7 +350,7 @@ if __name__ == "__main__":
                 output_shape=(origin_height, origin_width, 3),
                 order=0,
                 preserve_range=True,
-            )  ## Nearest neighbour
+            )  
 
             blended = blur_blending_cv2(warped_back, blended, backward_mask)
             blended *= 255.0
